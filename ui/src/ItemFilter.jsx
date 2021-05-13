@@ -2,7 +2,8 @@ import React from 'react';
 import URLSearchParams from 'url-search-params';
 import { withRouter } from 'react-router-dom';
 import {
-  ButtonToolbar, Button, FormGroup, FormControl, ControlLabel, InputGroup, Row, Col,
+  ButtonToolbar, Button, FormGroup, FormControl, ControlLabel, InputGroup,
+  Row, Col,
 } from 'react-bootstrap';
 
 class ItemFilter extends React.Component {
@@ -16,11 +17,11 @@ class ItemFilter extends React.Component {
       changed: false,
     };
 
+    this.onChangeCategory = this.onChangeCategory.bind(this);
+    this.onChangeEffortMin = this.onChangeEffortMin.bind(this);
+    this.onChangeEffortMax = this.onChangeEffortMax.bind(this);
     this.applyFilter = this.applyFilter.bind(this);
     this.showOriginalFilter = this.showOriginalFilter.bind(this);
-    this.onChangeCategory = this.onChangeCategory.bind(this);
-    this.onChangePriceMin = this.onChangePriceMin.bind(this);
-    this.onChangePriceMax = this.onChangePriceMax.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -35,14 +36,14 @@ class ItemFilter extends React.Component {
     this.setState({ category: e.target.value, changed: true });
   }
 
-  onChangePriceMin(e) {
+  onChangeEffortMin(e) {
     const priceString = e.target.value;
     if (priceString.match(/^\d*$/)) {
       this.setState({ priceMin: e.target.value, changed: true });
     }
   }
 
-  onChangePriceMax(e) {
+  onChangeEffortMax(e) {
     const priceString = e.target.value;
     if (priceString.match(/^\d*$/)) {
       this.setState({ priceMax: e.target.value, changed: true });
@@ -63,11 +64,11 @@ class ItemFilter extends React.Component {
   applyFilter() {
     const { category, priceMin, priceMax } = this.state;
     const { history } = this.props;
-
     const params = new URLSearchParams();
     if (category) params.set('category', category);
     if (priceMin) params.set('priceMin', priceMin);
     if (priceMax) params.set('priceMax', priceMax);
+
     const search = params.toString() ? `?${params.toString()}` : '';
     history.push({ pathname: '/items', search });
   }
@@ -86,21 +87,20 @@ class ItemFilter extends React.Component {
               onChange={this.onChangeCategory}
             >
               <option value="">(All)</option>
-              <option value="Jeans">Jeans</option>
-              <option value="Shirts">Shirts</option>
-              <option value="Jackets">Jackets</option>
-              <option value="Sweaters">Sweaters</option>
-              <option value="Accessories">Accessories</option>
+              <option value="New">New</option>
+              <option value="Assigned">Assigned</option>
+              <option value="Fixed">Fixed</option>
+              <option value="Closed">Closed</option>
             </FormControl>
           </FormGroup>
         </Col>
         <Col xs={6} sm={4} md={3} lg={2}>
           <FormGroup>
-            <ControlLabel>Price between:</ControlLabel>
+            <ControlLabel>Effort between:</ControlLabel>
             <InputGroup>
-              <FormControl value={priceMin} onChange={this.onChangePriceMin} />
+              <FormControl value={priceMin} onChange={this.onChangeEffortMin} />
               <InputGroup.Addon>-</InputGroup.Addon>
-              <FormControl value={priceMax} onChange={this.onChangePriceMax} />
+              <FormControl value={priceMax} onChange={this.onChangeEffortMax} />
             </InputGroup>
           </FormGroup>
         </Col>
@@ -125,4 +125,5 @@ class ItemFilter extends React.Component {
     );
   }
 }
+
 export default withRouter(ItemFilter);

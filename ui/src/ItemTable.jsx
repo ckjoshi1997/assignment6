@@ -6,10 +6,7 @@ import {
 } from 'react-bootstrap';
 
 const ItemRow = withRouter(({
-  item,
-  location: { search },
-  deleteItem,
-  index,
+  item, location: { search }, deleteItem, index,
 }) => {
   const selectLocation = { pathname: `/items/${item.id}`, search };
   const editTooltip = (
@@ -26,10 +23,8 @@ const ItemRow = withRouter(({
 
   const tableRow = (
     <tr>
-      {/* <td>{item.id}</td> */}
       <td>{item.name}</td>
       <td>{`$${item.price}`}</td>
-
       <td>{item.category}</td>
       <td>
         <a href={item.image} target="_blank" rel="noreferrer">View</a>
@@ -51,6 +46,7 @@ const ItemRow = withRouter(({
       </td>
     </tr>
   );
+
   return (
     <LinkContainer to={selectLocation}>
       {tableRow}
@@ -63,6 +59,7 @@ export default function ItemTable({ items, deleteItem }) {
     <ItemRow
       key={item.id}
       item={item}
+      // closeItem={closeItem}
       deleteItem={deleteItem}
       index={index}
     />
@@ -72,7 +69,8 @@ export default function ItemTable({ items, deleteItem }) {
     <Table bordered condensed hover responsive>
       <thead>
         <tr>
-          <th>Item Name</th>
+          {/* <th>ID</th> */}
+          <th>Name</th>
           <th>Price</th>
           <th>Category</th>
           <th>Image</th>

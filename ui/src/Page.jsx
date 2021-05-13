@@ -1,16 +1,19 @@
 import React from 'react';
 import {
   Navbar, Nav, NavItem, NavDropdown,
-  MenuItem, Glyphicon, Tooltip, OverlayTrigger, Grid,
+  MenuItem, Glyphicon,
+  Grid,
 } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
+
 import Contents from './Contents.jsx';
+import ItemAddNavItem from './ItemAddNavItem.jsx';
 
 function NavBar() {
   return (
-    <Navbar>
+    <Navbar fluid>
       <Navbar.Header>
-        <Navbar.Brand>My Company Inventory</Navbar.Brand>
+        <Navbar.Brand>Item Tracker</Navbar.Brand>
       </Navbar.Header>
       <Nav>
         <LinkContainer exact to="/">
@@ -24,18 +27,10 @@ function NavBar() {
         </LinkContainer>
       </Nav>
       <Nav pullRight>
-        <NavItem>
-          <OverlayTrigger
-            placement="left"
-            delayShow={1000}
-            overlay={<Tooltip id="create-item">Create Item</Tooltip>}
-          >
-            <Glyphicon glyph="plus" />
-          </OverlayTrigger>
-        </NavItem>
+        <ItemAddNavItem />
         <NavDropdown
           id="user-dropdown"
-          title={<Glyphicon glyph="option-vertical" />}
+          name={<Glyphicon glyph="option-vertical" />}
           noCaret
         >
           <MenuItem>About</MenuItem>
@@ -44,6 +39,7 @@ function NavBar() {
     </Navbar>
   );
 }
+
 function Footer() {
   return (
     <small>
@@ -51,19 +47,22 @@ function Footer() {
       <p className="text-center">
         Full source code available at this
         {' '}
-        <a href="https://github.com/ckjoshi1997/assignment6">
+        <a href="https://github.com/vasansr/pro-mern-stack-2">
           GitHub repository
         </a>
       </p>
     </small>
   );
 }
+
 export default function Page() {
   return (
-    <Grid fluid>
+    <div>
       <NavBar />
-      <Contents />
+      <Grid fluid>
+        <Contents />
+      </Grid>
       <Footer />
-    </Grid>
+    </div>
   );
 }

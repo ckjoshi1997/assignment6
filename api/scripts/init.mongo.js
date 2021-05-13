@@ -2,11 +2,11 @@
  * Run using the mongo shell. For remote databases, ensure that the
  * connection string is supplied in the command line. For example:
  * localhost:
- *   mongo issuetracker scripts/init.mongo.js
+ *   mongo items scripts/init.mongo.js
  * Atlas:
- *   mongo mongodb+srv://cjoshi:Yash2010@cs-648-02.sy6oc.mongodb.net/items scripts/init.mongo.js
+ *   mongo mongodb+srv://cjoshi:Yash2010@cs-648-02.sy6oc.mongodb.net/items?retryWrites=true scripts/init.mongo.js
  * MLab:
- *   mongo mongodb://user:pwd@xxx.mlab.com:33533/issuetracker scripts/init.mongo.js
+ *   mongo mongodb://user:pwd@xxx.mlab.com:33533/items scripts/init.mongo.js
  */
 
 /* global db print */
@@ -51,6 +51,7 @@ db.counters.insert({ _id: 'items', current: count });
 
 db.items.createIndex({ id: 1 }, { unique: true });
 db.items.createIndex({ category: 1 });
-db.items.createIndex({ name: 1 });
 db.items.createIndex({ image: 1 });
+db.items.createIndex({ created: 1 });
+
 db.deleted_items.createIndex({ id: 1 }, { unique: true });

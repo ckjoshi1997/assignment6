@@ -1,6 +1,6 @@
-enum ItemType {
-  Shirts
+enum CategoryType {
   Jeans
+  Shirts
   Jackets
   Sweaters
   Accessories
@@ -9,37 +9,39 @@ enum ItemType {
 type Item {
   _id: ID!
   id: Int!
-  category: ItemType
-  name: String
-  price: Float
+  name: String!
+  category: CategoryType
   image: String
+  price: Float
   description: String
 }
 
 input ItemInputs {
-  category: ItemType
   name: String!
-  price: Float!
+  category: CategoryType
   image: String
+  price: Float
   description: String
 }
 
 input ItemUpdateInputs {
-  category: ItemType
   name: String
-  price: Float
+  category: CategoryType
   image: String
+  price: Float
   description: String
 }
 
 ##### Top level declarations
 
 type Query {
-  itemList(category: ItemType, priceMin: Float, priceMax: Float): [Item!]!
+  about: String!
+  itemList(category: CategoryType, priceMin: Float, priceMax: Float): [Item!]!
   item(id: Int!): Item!
 }
 
 type Mutation {
+  setAboutMessage(message: String!): String
   itemAdd(item: ItemInputs!): Item!
   itemUpdate(id: Int!, changes: ItemUpdateInputs!): Item!
   itemDelete(id: Int!): Boolean!

@@ -1,6 +1,3 @@
-
-/* eslint "react/jsx-no-undef": "off" */
-
 import React from 'react';
 import URLSearchParams from 'url-search-params';
 import { Route } from 'react-router-dom';
@@ -8,17 +5,24 @@ import { Panel } from 'react-bootstrap';
 
 import ItemFilter from './ItemFilter.jsx';
 import ItemTable from './ItemTable.jsx';
-import ItemAdd from './ItemAdd.jsx';
 import ItemDetail from './ItemDetail.jsx';
 import graphQLFetch from './graphQLFetch.js';
+import Toast from './Toast.jsx';
 
-// list class
 export default class ItemList extends React.Component {
   constructor() {
     super();
-    this.state = { items: [] };
-    this.createItem = this.createItem.bind(this);
+    this.state = {
+      items: [],
+      toastVisible: false,
+      toastMessage: '',
+      toastType: 'info',
+    };
+    // this.closeItem = this.closeItem.bind(this);
     this.deleteItem = this.deleteItem.bind(this);
+    this.showSuccess = this.showSuccess.bind(this);
+    this.showError = this.showError.bind(this);
+    this.dismissToast = this.dismissToast.bind(this);
   }
 
   componentDidMount() {
@@ -45,7 +49,7 @@ export default class ItemList extends React.Component {
     if (!Number.isNaN(priceMax)) vars.priceMax = priceMax;
 
     const query = `query itemList(
-      $category: ItemType
+      $category: CategoryType
       $priceMin: Float
       $priceMax: Float
     ) {
@@ -54,32 +58,14 @@ export default class ItemList extends React.Component {
         priceMin: $priceMin
         priceMax: $priceMax
       ) {
-        id category name price image
+        id name category image
+        price
       }
     }`;
 
-    const data = await graphQLFetch(query, vars);
+    const data = await graphQLFetch(query, vars, this.showError);
     if (data) {
       this.setState({ items: data.itemList });
-    }
-  }
-
-  // create item and add to graphql
-  async createItem(item) {
-    const query = `mutation {
-        itemAdd(item:{
-            name: "${item.name}",
-            category: ${item.category},
-            price: ${item.price},
-            image: "${item.image}", 
-        }) {
-                id
-            }
-        }`;
-
-    const data = await graphQLFetch(query, { item });
-    if (data) {
-      this.loadData();
     }
   }
 
@@ -90,7 +76,7 @@ export default class ItemList extends React.Component {
     const { items } = this.state;
     const { location: { pathname, search }, history } = this.props;
     const { id } = items[index];
-    const data = await graphQLFetch(query, { id });
+    const data = await graphQLFetch(query, { id }, this.showError);
     if (data && data.itemDelete) {
       this.setState((prevState) => {
         const newList = [...prevState.items];
@@ -100,13 +86,31 @@ export default class ItemList extends React.Component {
         newList.splice(index, 1);
         return { items: newList };
       });
+      this.showSuccess(`Deleted item ${id} successfully.`);
     } else {
       this.loadData();
     }
   }
 
+  showSuccess(message) {
+    this.setState({
+      toastVisible: true, toastMessage: message, toastType: 'success',
+    });
+  }
+
+  showError(message) {
+    this.setState({
+      toastVisible: true, toastMessage: message, toastType: 'danger',
+    });
+  }
+
+  dismissToast() {
+    this.setState({ toastVisible: false });
+  }
+
   render() {
     const { items } = this.state;
+    const { toastVisible, toastType, toastMessage } = this.state;
     const { match } = this.props;
     return (
       <React.Fragment>
@@ -118,9 +122,18 @@ export default class ItemList extends React.Component {
             <ItemFilter />
           </Panel.Body>
         </Panel>
-        <ItemTable items={items} deleteItem={this.deleteItem} />
-        <ItemAdd createItem={this.createItem} />
+        <ItemTable
+          items={items}
+          deleteItem={this.deleteItem}
+        />
         <Route path={`${match.path}/:id`} component={ItemDetail} />
+        <Toast
+          showing={toastVisible}
+          onDismiss={this.dismissToast}
+          bsStyle={toastType}
+        >
+          {toastMessage}
+        </Toast>
       </React.Fragment>
     );
   }
