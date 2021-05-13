@@ -1,7 +1,6 @@
 import React from 'react';
 import {
-  Navbar, Nav, NavItem, NavDropdown,
-  MenuItem, Glyphicon,
+  Navbar, Nav, NavItem,
   Grid,
 } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
@@ -22,19 +21,9 @@ function NavBar() {
         <LinkContainer to="/items">
           <NavItem>Item List</NavItem>
         </LinkContainer>
-        <LinkContainer to="/report">
-          <NavItem>Report</NavItem>
-        </LinkContainer>
       </Nav>
       <Nav pullRight>
         <ItemAddNavItem />
-        <NavDropdown
-          id="user-dropdown"
-          name={<Glyphicon glyph="option-vertical" />}
-          noCaret
-        >
-          <MenuItem>About</MenuItem>
-        </NavDropdown>
       </Nav>
     </Navbar>
   );

@@ -35,13 +35,11 @@ input ItemUpdateInputs {
 ##### Top level declarations
 
 type Query {
-  about: String!
   itemList(category: CategoryType, priceMin: Float, priceMax: Float): [Item!]!
   item(id: Int!): Item!
 }
 
 type Mutation {
-  setAboutMessage(message: String!): String
   itemAdd(item: ItemInputs!): Item!
   itemUpdate(id: Int!, changes: ItemUpdateInputs!): Item!
   itemDelete(id: Int!): Boolean!
