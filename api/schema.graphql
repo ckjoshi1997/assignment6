@@ -1,0 +1,46 @@
+enum ItemType {
+  Shirts
+  Jeans
+  Jackets
+  Sweaters
+  Accessories
+}
+
+type Item {
+  _id: ID!
+  id: Int!
+  category: ItemType
+  name: String
+  price: Float
+  image: String
+  description: String
+}
+
+input ItemInputs {
+  category: ItemType
+  name: String!
+  price: Float!
+  image: String
+  description: String
+}
+
+input ItemUpdateInputs {
+  category: ItemType
+  name: String
+  price: Float
+  image: String
+  description: String
+}
+
+##### Top level declarations
+
+type Query {
+  itemList(category: ItemType, priceMin: Float, priceMax: Float): [Item!]!
+  item(id: Int!): Item!
+}
+
+type Mutation {
+  itemAdd(item: ItemInputs!): Item!
+  itemUpdate(id: Int!, changes: ItemUpdateInputs!): Item!
+  itemDelete(id: Int!): Boolean!
+}
