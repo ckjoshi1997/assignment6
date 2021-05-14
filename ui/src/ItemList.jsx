@@ -1,6 +1,5 @@
 import React from 'react';
 import URLSearchParams from 'url-search-params';
-import { Route } from 'react-router-dom';
 import { Panel } from 'react-bootstrap';
 
 import ItemFilter from './ItemFilter.jsx';
@@ -8,50 +7,32 @@ import ItemTable from './ItemTable.jsx';
 import ItemDetail from './ItemDetail.jsx';
 import graphQLFetch from './graphQLFetch.js';
 import Toast from './Toast.jsx';
+import store from './store.js';
 
 export default class ItemList extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      items: [],
-      toastVisible: false,
-      toastMessage: '',
-      toastType: 'info',
-    };
-    // this.closeItem = this.closeItem.bind(this);
-    this.deleteItem = this.deleteItem.bind(this);
-    this.showSuccess = this.showSuccess.bind(this);
-    this.showError = this.showError.bind(this);
-    this.dismissToast = this.dismissToast.bind(this);
-  }
-
-  componentDidMount() {
-    this.loadData();
-  }
-
-  componentDidUpdate(prevProps) {
-    const { location: { search: prevSearch } } = prevProps;
-    const { location: { search } } = this.props;
-    if (prevSearch !== search) {
-      this.loadData();
-    }
-  }
-
-  async loadData() {
-    const { location: { search } } = this.props;
+  static async fetchData(match, search, showError) {
     const params = new URLSearchParams(search);
-    const vars = {};
+    const vars = { hasSelection: false, selectedId: 0 };
     if (params.get('category')) vars.category = params.get('category');
 
-    const priceMin = parseInt(params.get('priceMin'), 10);
+    const priceMin = parseFloat(params.get('priceMin'), 10);
     if (!Number.isNaN(priceMin)) vars.priceMin = priceMin;
-    const priceMax = parseInt(params.get('priceMax'), 10);
+    const priceMax = parseFloat(params.get('priceMax'), 10);
     if (!Number.isNaN(priceMax)) vars.priceMax = priceMax;
+
+    const { params: { id } } = match;
+    const idInt = parseInt(id, 10);
+    if (!Number.isNaN(idInt)) {
+      vars.hasSelection = true;
+      vars.selectedId = idInt;
+    }
 
     const query = `query itemList(
       $category: CategoryType
       $priceMin: Float
       $priceMax: Float
+      $hasSelection: Boolean!
+      $selectedId: Int!
     ) {
       itemList(
         category: $category
@@ -59,13 +40,59 @@ export default class ItemList extends React.Component {
         priceMax: $priceMax
       ) {
         id name category image
-        price
+        due
+      }
+      item(id: $selectedId) @include (if : $hasSelection) {
+        id description
       }
     }`;
 
-    const data = await graphQLFetch(query, vars, this.showError);
+    const data = await graphQLFetch(query, vars, showError);
+    return data;
+  }
+
+  constructor() {
+    super();
+    const items = store.initialData ? store.initialData.itemList : null;
+    const selectedItem = store.initialData
+      ? store.initialData.item
+      : null;
+    delete store.initialData;
+    this.state = {
+      items,
+      selectedItem,
+      toastVisible: false,
+      toastMessage: '',
+      toastType: 'info',
+    };
+    this.closeItem = this.closeItem.bind(this);
+    this.deleteItem = this.deleteItem.bind(this);
+    this.showSuccess = this.showSuccess.bind(this);
+    this.showError = this.showError.bind(this);
+    this.dismissToast = this.dismissToast.bind(this);
+  }
+
+  componentDidMount() {
+    const { items } = this.state;
+    if (items == null) this.loadData();
+  }
+
+  componentDidUpdate(prevProps) {
+    const {
+      location: { search: prevSearch },
+      match: { params: { id: prevId } },
+    } = prevProps;
+    const { location: { search }, match: { params: { id } } } = this.props;
+    if (prevSearch !== search || prevId !== id) {
+      this.loadData();
+    }
+  }
+
+  async loadData() {
+    const { location: { search, match } } = this.props;
+    const data = await ItemList.fetchData(match, search, this.showError);
     if (data) {
-      this.setState({ items: data.itemList });
+      this.setState({ items: data.itemList, selectedItem: data.item });
     }
   }
 
@@ -110,8 +137,10 @@ export default class ItemList extends React.Component {
 
   render() {
     const { items } = this.state;
+    if (items == null) return null;
+
     const { toastVisible, toastType, toastMessage } = this.state;
-    const { match } = this.props;
+    const { selectedItem } = this.state;
     return (
       <React.Fragment>
         <Panel>
@@ -126,7 +155,7 @@ export default class ItemList extends React.Component {
           items={items}
           deleteItem={this.deleteItem}
         />
-        <Route path={`${match.path}/:id`} component={ItemDetail} />
+        <ItemDetail item={selectedItem} />
         <Toast
           showing={toastVisible}
           onDismiss={this.dismissToast}

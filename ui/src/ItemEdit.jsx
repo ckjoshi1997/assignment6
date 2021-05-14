@@ -11,12 +11,27 @@ import graphQLFetch from './graphQLFetch.js';
 import NumInput from './NumInput.jsx';
 import TextInput from './TextInput.jsx';
 import Toast from './Toast.jsx';
+import store from './store.js';
 
 export default class ItemEdit extends React.Component {
+  static async fetchData(match, search, showError) {
+    const query = `query item($id: Int!) {
+      item(id: $id) {
+        id name category image
+        price description
+      }
+    }`;
+    const { params: { id } } = match;
+    const result = await graphQLFetch(query, { id }, showError);
+    return result;
+  }
+
   constructor() {
     super();
+    const item = store.initialData ? store.initialData.issue : null;
+    delete store.initialData;
     this.state = {
-      item: {},
+      item,
       invalidFields: {},
       showingValidation: false,
       toastVisible: false,
@@ -34,7 +49,10 @@ export default class ItemEdit extends React.Component {
   }
 
   componentDidMount() {
-    this.loadData();
+    const { item } = this.state;
+    if (item == null) {
+      this.loadData();
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -92,15 +110,8 @@ export default class ItemEdit extends React.Component {
   }
 
   async loadData() {
-    const query = `query item($id: Int!) {
-      item(id: $id) {
-        id name category image
-        price description
-      }
-    }`;
-
-    const { match: { params: { id } } } = this.props;
-    const data = await graphQLFetch(query, { id }, this.showError);
+    const { match } = this.props;
+    const data = await ItemEdit.fetchData(match, null, this.showError);
     this.setState({ item: data ? data.item : {}, invalidFields: {} });
   }
 
@@ -129,6 +140,10 @@ export default class ItemEdit extends React.Component {
   }
 
   render() {
+    const { item } = this.state;
+    if (item == null) {
+      return null;
+    }
     const { item: { id } } = this.state;
     const { match: { params: { id: propsId } } } = this.props;
     if (id == null) {
